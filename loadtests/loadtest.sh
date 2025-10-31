@@ -1,0 +1,1 @@
+vegeta attack -targets="./loadtests/targets.txt" -body="./loadtests/payload.json" -rate=1000 -duration=30s | tee "./loadtests/results/results.bin" | vegeta report -type=text > "./loadtests/results/report.txt"
