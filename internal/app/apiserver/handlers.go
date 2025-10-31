@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/vo1dFl0w/test_api/internal/app/apiserver/utils"
 	"github.com/vo1dFl0w/test_api/internal/app/model"
 )
 
@@ -12,6 +13,11 @@ func (s *Server) GetWallet(uuid string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			s.error(w, r, http.StatusMethodNotAllowed, ErrMethodNotAllowed)
+			return
+		}
+
+		if !utils.ValidationID(uuid) {
+			s.error(w, r, http.StatusMethodNotAllowed, fmt.Errorf("invlid uuid: %s", uuid))
 			return
 		}
 
@@ -41,6 +47,11 @@ func (s *Server) Transaction() http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
+		}
+
+		if !utils.ValidateTransaction(req.UUID, req.Operation, req.Amount) {
+			s.error(w, r, http.StatusBadRequest, fmt.Errorf("invalid data"))
+			return 
 		}
 
 		walletID := &model.Wallet{
