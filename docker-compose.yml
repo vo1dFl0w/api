@@ -1,0 +1,41 @@
+services:
+  app:
+    build: ./
+    container_name: ps-app
+    ports:
+      - "8080:8080"
+    env_file:
+    - config.env
+    depends_on:
+    - db
+
+  db:
+    restart: always
+    image: postgres:14-alpine
+    container_name: ps-db
+    ports:
+      - "5432:5432"
+    environment:
+        POSTGRES_DB: wallets_db
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: admin
+    command: postgres -c max_connections=300
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init_wallets_db.sql:/docker-entrypoint-initdb.d/init_wallets_db.sql:ro
+  db_test:
+    restart: always
+    image: postgres:14-alpine
+    container_name: test-db
+    ports:
+      - "5433:5432"
+    environment:
+        POSTGRES_DB: wallets_db_test
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: admin
+    volumes:
+      - test_db_data:/var/lib/postgresql/data
+      - ./db/init_test_db.sql:/docker-entrypoint-initdb.d/init_test_db.sql:ro
+volumes:
+  db_data:
+  test_db_data:
